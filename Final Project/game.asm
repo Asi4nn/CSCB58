@@ -45,10 +45,17 @@
 	
 	objectWidth: .word 2
 	objectHeight: .word 3
+	objects: .word 0:3
+	numOfObjects: .word 0
 	
 	# note: scaled by 4 for address calculation
 	displayWidth: .word 256
 	displayHeight: .word 512
+	
+	red: .word 0xff0000
+	white: .word 0xffffff
+	black: .word 0
+	gray: .word 0x999999
 
 .eqv refreshRate 40
 
@@ -75,7 +82,7 @@ setup:	jal clear_screen	# clear the screen for resets
 	li $t7, 4
 	mult $s0, $t7
 	mflo $s0	# get address of x value
-	li $s1, 40	# y value for object (not adjusted for address)
+	li $s1, 80	# y value for object (not adjusted for address)
 	
 	# (x, y) initial values for player model
 	li $t3, 100	# 4*x
@@ -107,9 +114,9 @@ main:
 	
 	jal check_player
 	
-	addi $t4, $t4, 1
+	addi $t4, $t4, 2
 	jal clear_player
-	subi $t4, $t4, 1
+	subi $t4, $t4, 2
 	
 	jal draw_player
 	
@@ -123,7 +130,7 @@ keypress_return:
 	li $a0, refreshRate
 	syscall
 	
-	subi $t4, $t4, 1	# move player y up the screen
+	subi $t4, $t4, 2	# move player y up the screen
 	
 	j main	# loop
 
@@ -388,6 +395,1392 @@ draw_player:
 
 	jr $ra
 	
+draw_gameover:
+	addi $t5, $t0, 0
+	addi $t5, $t5, 5156
+	
+	# Start of word GAME
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 8
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 8
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 108
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	# Start of word OVER
+	addi $t5, $t5, 588
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 16
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 16
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 8
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 8
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 8
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 8
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 76
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 24
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 100
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 24
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 100
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 16
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 92
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 16
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 44
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 92
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 16
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	addi $t5, $t5, 84
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	addi $t5, $t5, 16
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 28
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 12
+	
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	addi $t5, $t5, 20
+	sw $t8, ($t5)
+	addi $t5, $t5, 4
+	sw $t8, ($t5)
+	
+	jr $ra
+	
 clear_player:
 	# load player (x, y) values and calculate address, using t5 as final address
 	lw $t6, displayWidth
@@ -634,6 +2027,16 @@ clear_loop_end:
 	jr $ra
 	
 END:
-	li $v0, 10
-	syscall	
+	jal draw_gameover
+ENDLOOP:	
+	lw $s3, 0($s2)	# keypress bool
+	lw $s4, 4($s2)	# keypress value
+	beq $s3, 1, handle_keypress
+	
+	# sleep for 40ms
+	li $v0, 32
+	li $a0, refreshRate
+	syscall
+	
+	j ENDLOOP
 	
