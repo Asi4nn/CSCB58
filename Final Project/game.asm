@@ -45,8 +45,7 @@
 	
 	objectWidth: .word 2
 	objectHeight: .word 3
-	objects: .word 0:3
-	numOfObjects: .word 0
+	objects: .word 0:9	# store (active, x,y) values for 3 objects, active = 1 when the object is on screen
 	
 	# note: scaled by 4 for address calculation
 	displayWidth: .word 256
@@ -69,20 +68,10 @@
 	li $t8, 0x999999 # $t1 stores gray
 
 	lw $s2, inputAddress
+	la $s5, objects
 	
 setup:	jal clear_screen	# clear the screen for resets
-
-	# generate random x value for the object
-	li $v0, 42         # Service 42, random int range
-	li $a0, 0          # Select random generator 0
-	li $a1, 64	   # Select upper bound of random number
-	syscall            # Generate random int (returns in $a0)
-	
-	la $s0, ($a0)	# save random x in s0
-	li $t7, 4
-	mult $s0, $t7
-	mflo $s0	# get address of x value
-	li $s1, 80	# y value for object (not adjusted for address)
+	jal reset_objects
 	
 	# (x, y) initial values for player model
 	li $t3, 100	# 4*x
@@ -98,25 +87,24 @@ setup:	jal clear_screen	# clear the screen for resets
 #	t6 : free, typical use for movement caluclation
 #	t7 : free
 #	t8 : RGB gray
-#	t9 : RGB 
+#	t9 : RGB black
 #
-#	s0 : object x val
-#	s1 : object y val
+#	s0 :
+#	s1 : 
 #	s2 : inputAddress
 #	s3 : input boolean
 #	s4 : input value
-#	s5 : 
+#	s5 : object array
 #	s6 :
 #	s7 :
-			
+	li $s7, 0
 main:	
-	jal draw_object
-	
+	jal update_objects
 	jal check_player
 	
-	addi $t4, $t4, 2
+	addi $t4, $t4, 1
 	jal clear_player
-	subi $t4, $t4, 2
+	subi $t4, $t4, 1
 	
 	jal draw_player
 	
@@ -130,7 +118,7 @@ keypress_return:
 	li $a0, refreshRate
 	syscall
 	
-	subi $t4, $t4, 2	# move player y up the screen
+	subi $t4, $t4, 1	# move player y up the screen
 	
 	j main	# loop
 
@@ -144,14 +132,144 @@ handle_p:
 	jal clear_screen
 	j setup
 
-# draw object function
+update_objects:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	lw $a0, 0($s5)
+	lw $a1, 4($s5)
+	lw $a2, 8($s5)
+	jal update_object
+	sw $a0, 0($s5)
+	sw $a1, 4($s5)
+	sw $a2, 8($s5)
+	
+	lw $a0, 12($s5)
+	lw $a1, 16($s5)
+	lw $a2, 20($s5)
+	jal update_object
+	sw $a0, 12($s5)
+	sw $a1, 16($s5)
+	sw $a2, 20($s5)
+	
+	lw $a0, 24($s5)
+	lw $a1, 28($s5)
+	lw $a2, 32($s5)
+	jal update_object
+	sw $a0, 24($s5)
+	sw $a1, 28($s5)
+	sw $a2, 32($s5)
+	
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra
+
+# update single object, takes params (a0, a1, a2) = (active, x, y)
+update_object:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	beq $a0, 1, activated
+	jal spawn_object
+	j object_return
+activated:
+	jal clear_object
+	add $a1, $a1, 0
+	add $a2, $a2, 2
+	jal check_object
+	jal draw_object
+object_return:
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra
+
+check_object:
+	bge $a2, 125, set_inactive
+	jr $ra
+set_inactive:
+	li $a0, 0
+	li $a1, 0
+	li $a2, 0
+	j object_return
+
+# spawn object function, takes params (a0, a1, a2) = (active, x, y)
+spawn_object:
+	# generate random x value for the object
+	li $v0, 42         # Service 42, random int range
+	li $a0, 0          # Select random generator 0
+	li $a1, 63	   # Select upper bound of random number
+	syscall            # Generate random int (returns in $a0)
+	
+	la $a1, ($a0)	# save random x in a1
+	li $a2, 0	# y value for object (not adjusted for address)
+	li $a0, 1
+	jr $ra
+
+# sets all object values to default
+reset_objects:
+	sw $zero, 0($s5)
+	sw $zero, 4($s5)
+	sw $zero, 8($s5)
+	
+	sw $zero, 12($s5)
+	sw $zero, 16($s5)
+	sw $zero, 20($s5)
+	
+	sw $zero, 24($s5)
+	sw $zero, 28($s5)
+	sw $zero, 32($s5)
+
+	jr $ra
+
+# checks if the player is at the top of the screen
+check_player:
+	bltz $t4, END	# if the player is at the top, end the program
+	jr $ra
+	
+clear_screen:
+	addi $t5, $t0, 0	# load display addr
+	li $t6, 0		# counter for number of pixels passed
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+clear_loop:
+	sw $t9, ($t5)		# set pixel bg colour
+	addi $t5, $t5, 4	# goto next pixel
+	addi $t6, $t6, 1	# increment counter
+	bgt $t6, 8192, clear_loop_end
+	j clear_loop
+clear_loop_end:
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra
+
+END:
+	jal draw_gameover
+ENDLOOP:	
+	lw $s3, 0($s2)	# keypress bool
+	lw $s4, 4($s2)	# keypress value
+	beq $s3, 1, handle_keypress
+	
+	# sleep for 40ms
+	li $v0, 32
+	li $a0, refreshRate
+	syscall
+	
+	j ENDLOOP
+
+# draw object function, takes a1 = x val, a2 = y val
 draw_object:
+	# calculate addr for y val
 	lw $t6, displayWidth
-	la $t5, ($s1)		
+	la $t5, ($a2)		
 	mult $t5, $t6
 	mflo $t5
 	
-	add $t5, $t5, $s0
+	# calculate addr for x val
+	li $t7, 4
+	mult $a1, $t7
+	mflo $t6
+	
+	add $t5, $t5, $t6
 	
 	# offset from displayAddress
 	add $t5, $t0, $t5
@@ -171,7 +289,41 @@ draw_object:
 	sw $t8, ($t5)
 	
 	jr $ra
+
+# clear object function, takes a1 = x val, a2 = y val
+clear_object:
+	# calculate addr for y val
+	lw $t6, displayWidth
+	la $t5, ($a2)		
+	mult $t5, $t6
+	mflo $t5
 	
+	# calculate addr for x val
+	li $t7, 4
+	mult $a1, $t7
+	mflo $t6
+	
+	add $t5, $t5, $t6
+	
+	# offset from displayAddress
+	add $t5, $t0, $t5
+	
+	sw $t9, ($t5)
+	addi $t5, $t5, 4
+	sw $t9, ($t5)
+	
+	addi $t5, $t5, 252
+	sw $t9, ($t5)
+	addi $t5, $t5, 4
+	sw $t9, ($t5)
+	
+	addi $t5, $t5, 252
+	sw $t9, ($t5)
+	addi $t5, $t5, 4
+	sw $t9, ($t5)
+	
+	jr $ra
+
 	
 # draw player function
 draw_player:
@@ -2001,42 +2153,3 @@ clear_player:
 	sw $t9, ($t5)
 
 	jr $ra
-
-# checks if the player is at the top of the screen
-check_player:
-	bltz $t4, END	# if the player is at the top, end the program
-	jr $ra
-	
-	
-clear_screen:
-	addi $t5, $t0, 0	# load display addr
-	li $t6, 0		# counter for number of pixels passed
-	
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
-clear_loop:
-	sw $t9, ($t5)		# set pixel bg colour
-	addi $t5, $t5, 4	# goto next pixel
-	
-	addi $t6, $t6, 1	# increment counter
-	bgt $t6, 8192, clear_loop_end
-	j clear_loop
-clear_loop_end:
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
-	jr $ra
-	
-END:
-	jal draw_gameover
-ENDLOOP:	
-	lw $s3, 0($s2)	# keypress bool
-	lw $s4, 4($s2)	# keypress value
-	beq $s3, 1, handle_keypress
-	
-	# sleep for 40ms
-	li $v0, 32
-	li $a0, refreshRate
-	syscall
-	
-	j ENDLOOP
-	
