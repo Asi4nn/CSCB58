@@ -39,12 +39,7 @@
 	displayAddress: .word 0x10008000
 	inputAddress: .word 0xffff0000
 	
-	# dimensions
-	playerWidth: .word 15
-	playerHeight: .word 13
 	
-	objectWidth: .word 2
-	objectHeight: .word 3
 	objects: .word 0:9	# store (active, x,y) values for 3 objects, active = 1 when the object is on screen
 	
 	# note: scaled by 4 for address calculation
@@ -55,8 +50,20 @@
 	white: .word 0xffffff
 	black: .word 0
 	gray: .word 0x999999
+	
+	health: .word 3
+	collisions: .word 0	# keep track of collisions with objects
 
 .eqv refreshRate 40
+.eqv playerWidth 15
+.eqv playerHeight 13
+.eqv playerSpeed 2
+.eqv healthLocation 31240
+.eqv playerWidth 15
+.eqv playerHeight 13
+.eqv objectWidth 2
+.eqv objectHeight 3
+
 
 .text
 	# setting up registers
@@ -72,10 +79,14 @@
 	
 setup:	jal clear_screen	# clear the screen for resets
 	jal reset_objects
+	li $t7, 3
+	sw $t7, health		# reset health
+	li $t7, 0
+	sw $t7, collisions	# reset collisions
 	
 	# (x, y) initial values for player model
-	li $t3, 20	# x
-	li $t4, 110	# y
+	li $t3, 26	# x
+	li $t4, 111	# y
 	
 # 	RESERVED REGISTERS
 #	t0 : displayAddress
@@ -86,8 +97,8 @@ setup:	jal clear_screen	# clear the screen for resets
 #	t5 : free, typical use for movement calculation
 #	t6 : free, typical use for movement caluclation
 #	t7 : free
-#	t8 : RGB gray
-#	t9 : RGB black
+#	t8 : RGB object colour
+#	t9 : RGB background colour
 #
 #	s0 :
 #	s1 : 
@@ -97,11 +108,14 @@ setup:	jal clear_screen	# clear the screen for resets
 #	s5 : object array
 #	s6 :
 #	s7 :
+
 	li $s7, 0
 main:	
 	jal update_objects
 	
 	jal draw_player
+	
+	jal draw_health
 	
 	lw $s3, 0($s2)	# keypress bool
 	lw $s4, 4($s2)	# keypress value
@@ -125,6 +139,8 @@ handle_keypress:
 	beq $s4, 0x61, handle_a
 	beq $s4, 0x73, handle_s
 	beq $s4, 0x64, handle_d
+	
+	beq $s4, 0x71, lower_health	# testing purposes (press q to lower health)
 	j keypress_return
 	
 # game restart
@@ -138,7 +154,7 @@ handle_w:
 	j keypress_return
 move_up:	
 	jal clear_player
-	subi $t4, $t4, 1	# move player y up the screen
+	subi $t4, $t4, playerSpeed	# move player y up the screen
 	j keypress_return
 	
 handle_s:
@@ -146,7 +162,7 @@ handle_s:
 	j keypress_return
 move_down:
 	jal clear_player
-	addi $t4, $t4, 1	# move player y down the screen
+	addi $t4, $t4, playerSpeed	# move player y down the screen
 	j keypress_return
 	
 handle_a:
@@ -154,17 +170,41 @@ handle_a:
 	j keypress_return
 move_left:
 	jal clear_player
-	subi $t3, $t3, 1	# move player x left
+	subi $t3, $t3, playerSpeed	# move player x left
 	j keypress_return
 	
 handle_d:
-	ble $t3, 48, move_right
+	ble $t3, 47, move_right
 	j keypress_return
 move_right:
 	jal clear_player
-	addi $t3, $t3, 1	# move player x right
+	addi $t3, $t3, playerSpeed	# move player x right
 	j keypress_return
 
+lower_health:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	lw $t5, health
+	subi $t5, $t5, 1	# lower health  by 1
+	
+	li $t6, 7	# hearts offset
+	li $t7, 4	# address size
+	mult $t6, $t7
+	mflo $t6	# calculates proper pixel offset for 1 heart
+	mult $t6, $t5	# multiply by number of hearts
+	mflo $t6
+	add $a0, $t6, healthLocation
+	add $a0, $a0, $t0
+	jal clear_heart
+	
+	beq $t5, 0, END		# goto END if health = 0
+	
+	sw $t5, health
+	
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra
 
 update_objects:
 	addi $sp, $sp, -4
@@ -218,6 +258,19 @@ object_return:
 	jr $ra
 
 check_object:
+	# collision test against player cords (t3, t4)
+	addi $t5, $t3, playerWidth
+	bgt $a1, $t5, no_collision	# objectX > playerX + playerWidth
+	addi $t5, $a1, objectWidth
+	blt $t5, $t3, no_collision	# objectX + objectWidth < playerX
+	addi $t5, $a2, objectHeight
+	blt $t5, $t4, no_collision	# objectY + objectHeight < playerY
+	addi $t5, $t4, playerHeight
+	bgt $a2, $t5, no_collision	# objectY > playerY + playerHeight
+	# there is collision
+	jal lower_health
+	j set_inactive
+no_collision:
 	bge $a2, 125, set_inactive
 	jr $ra
 set_inactive:
@@ -580,6 +633,95 @@ draw_player:
 	sw $t1, ($t5)
 
 	jr $ra
+	
+draw_health:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	addi $t5, $t0, healthLocation	# starting cordinate of health location (6th last row)
+	lw $t7, health
+draw_health_loop:
+	ble $t7, 0, draw_health_end
+	addi $a0, $t5, 0
+	jal draw_heart
+	
+	subi $t7, $t7, 1
+	addi $t5, $t5, 28
+	j draw_health_loop
+	
+draw_health_end:
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra
+
+# takes (x, y) cords as top left of the heart in a0 = y*256 + 4*x + displayLocation
+draw_heart:
+	addi $a0, $a0, 4
+	
+	sw $t1, ($a0)
+	addi $a0, $a0, 8
+	sw $t1, ($a0)
+	
+	addi $a0, $a0, 244
+	
+	sw $t1, ($a0)
+	addi $a0, $a0, 4
+	sw $t1, ($a0)
+	addi $a0, $a0, 4
+	sw $t1, ($a0)
+	addi $a0, $a0, 4
+	sw $t1, ($a0)
+	addi $a0, $a0, 4
+	sw $t1, ($a0)
+	
+	addi $a0, $a0, 244
+	
+	sw $t1, ($a0)
+	addi $a0, $a0, 4
+	sw $t1, ($a0)
+	addi $a0, $a0, 4
+	sw $t1, ($a0)
+	
+	addi $a0, $a0, 252
+	
+	sw $t1, ($a0)
+	
+	jr $ra
+	
+# takes (x, y) cords as top left of the heart in a0 = y*256 + 4*x + displayLocation
+clear_heart:
+	addi $a0, $a0, 4
+	
+	sw $t9, ($a0)
+	addi $a0, $a0, 8
+	sw $t9, ($a0)
+	
+	addi $a0, $a0, 244
+	
+	sw $t9, ($a0)
+	addi $a0, $a0, 4
+	sw $t9, ($a0)
+	addi $a0, $a0, 4
+	sw $t9, ($a0)
+	addi $a0, $a0, 4
+	sw $t9, ($a0)
+	addi $a0, $a0, 4
+	sw $t9, ($a0)
+	
+	addi $a0, $a0, 244
+	
+	sw $t9, ($a0)
+	addi $a0, $a0, 4
+	sw $t9, ($a0)
+	addi $a0, $a0, 4
+	sw $t9, ($a0)
+	
+	addi $a0, $a0, 252
+	
+	sw $t9, ($a0)
+	
+	jr $ra
+	
 	
 draw_gameover:
 	addi $t5, $t0, 0
