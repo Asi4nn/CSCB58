@@ -138,21 +138,21 @@ handle_w:
 	j keypress_return
 move_up:	
 	jal clear_player
-	subi $t4, $t4, 1	# move player up the screen
+	subi $t4, $t4, 1	# move player y up the screen
 	j keypress_return
 	
 handle_s:
- 	bge $t4, 1, move_left
+	ble $t4, 114, move_down
 	j keypress_return
-move_left:
+move_down:
 	jal clear_player
-	addi $t4, $t4, 1	# move player down the screen
+	addi $t4, $t4, 1	# move player y down the screen
 	j keypress_return
 	
 handle_a:
-	ble $t3, 114, move_down
+	bge $t3, 1, move_left
 	j keypress_return
-move_down:
+move_left:
 	jal clear_player
 	subi $t3, $t3, 1	# move player x left
 	j keypress_return
