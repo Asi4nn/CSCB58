@@ -14,7 +14,7 @@
 #
 # Which milestones have been reached in this submission?
 # (See the assignment handout for descriptions of the milestones)
-# - Milestone 1
+# - Milestone 2
 #
 # Which approved features have been implemented for milestone 3?
 # (See the assignment handout for the list of additional features)
@@ -74,7 +74,7 @@ setup:	jal clear_screen	# clear the screen for resets
 	jal reset_objects
 	
 	# (x, y) initial values for player model
-	li $t3, 100	# 4*x
+	li $t3, 20	# x
 	li $t4, 110	# y
 	
 # 	RESERVED REGISTERS
@@ -100,11 +100,6 @@ setup:	jal clear_screen	# clear the screen for resets
 	li $s7, 0
 main:	
 	jal update_objects
-	jal check_player
-	
-	addi $t4, $t4, 1
-	jal clear_player
-	subi $t4, $t4, 1
 	
 	jal draw_player
 	
@@ -112,25 +107,64 @@ main:
 	lw $s4, 4($s2)	# keypress value
 	beq $s3, 1, handle_keypress
 
-keypress_return:
-	# sleep for 40ms
+	# sleep for refreshRate time
 	li $v0, 32
 	li $a0, refreshRate
 	syscall
 	
-	subi $t4, $t4, 1	# move player y up the screen
-	
+	beq $s3, 1, handle_keypress
+keypress_return:
 	j main	# loop
 
 
 handle_keypress:
 	beq $s4, 0x70, handle_p
+	
+	# moving
+	beq $s4, 0x77, handle_w
+	beq $s4, 0x61, handle_a
+	beq $s4, 0x73, handle_s
+	beq $s4, 0x64, handle_d
 	j keypress_return
 	
-	
+# game restart
 handle_p:
 	jal clear_screen
 	j setup
+
+# handle player movements	
+handle_w:
+	bge $t4, 1, move_up
+	j keypress_return
+move_up:	
+	jal clear_player
+	subi $t4, $t4, 1	# move player up the screen
+	j keypress_return
+	
+handle_s:
+ 	bge $t4, 1, move_left
+	j keypress_return
+move_left:
+	jal clear_player
+	addi $t4, $t4, 1	# move player down the screen
+	j keypress_return
+	
+handle_a:
+	ble $t3, 114, move_down
+	j keypress_return
+move_down:
+	jal clear_player
+	subi $t3, $t3, 1	# move player x left
+	j keypress_return
+	
+handle_d:
+	ble $t3, 48, move_right
+	j keypress_return
+move_right:
+	jal clear_player
+	addi $t3, $t3, 1	# move player x right
+	j keypress_return
+
 
 update_objects:
 	addi $sp, $sp, -4
@@ -175,7 +209,7 @@ update_object:
 activated:
 	jal clear_object
 	add $a1, $a1, 0
-	add $a2, $a2, 2
+	add $a2, $a2, 1
 	jal check_object
 	jal draw_object
 object_return:
@@ -219,11 +253,6 @@ reset_objects:
 	sw $zero, 28($s5)
 	sw $zero, 32($s5)
 
-	jr $ra
-
-# checks if the player is at the top of the screen
-check_player:
-	bltz $t4, END	# if the player is at the top, end the program
 	jr $ra
 	
 clear_screen:
@@ -333,7 +362,12 @@ draw_player:
 	mult $t5, $t6
 	mflo $t5
 	
-	add $t5, $t5, $t3
+	# calculate addr for x val
+	li $t7, 4
+	mult $t3, $t7
+	mflo $t6
+	
+	add $t5, $t5, $t6
 	
 	# offset from displayAddress
 	add $t5, $t0, $t5
@@ -1940,7 +1974,12 @@ clear_player:
 	mult $t5, $t6
 	mflo $t5
 	
-	add $t5, $t5, $t3
+	# calculate addr for x val
+	li $t7, 4
+	mult $t3, $t7
+	mflo $t6
+	
+	add $t5, $t5, $t6
 	
 	# offset from displayAddress
 	add $t5, $t0, $t5
