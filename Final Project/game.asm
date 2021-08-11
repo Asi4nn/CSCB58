@@ -109,7 +109,10 @@ setup:	jal clear_screen	# clear the screen for resets
 #	s6 :
 #	s7 :
 
-	li $s7, 0
+	# sleep before starting
+	li $v0, 32
+	li $a0, 1000
+	syscall
 main:	
 	jal update_objects
 	
@@ -145,7 +148,6 @@ handle_keypress:
 	
 # game restart
 handle_p:
-	jal clear_screen
 	j setup
 
 # handle player movements	
@@ -268,6 +270,9 @@ check_object:
 	addi $t5, $t4, playerHeight
 	bgt $a2, $t5, no_collision	# objectY > playerY + playerHeight
 	# there is collision
+	lw $t6 collisions
+	addi $t6, $t6, 1	# increment number of collisions by 1
+	sw $t6, collisions
 	jal lower_health
 	j set_inactive
 no_collision:
@@ -317,7 +322,7 @@ clear_loop:
 	sw $t9, ($t5)		# set pixel bg colour
 	addi $t5, $t5, 4	# goto next pixel
 	addi $t6, $t6, 1	# increment counter
-	bgt $t6, 8192, clear_loop_end
+	bgt $t6, 8191, clear_loop_end
 	j clear_loop
 clear_loop_end:
 	lw $ra, 0($sp)
@@ -331,9 +336,9 @@ ENDLOOP:
 	lw $s4, 4($s2)	# keypress value
 	beq $s3, 1, handle_keypress
 	
-	# sleep for 40ms
+	# sleep for 100ms
 	li $v0, 32
-	li $a0, refreshRate
+	li $a0, 100
 	syscall
 	
 	j ENDLOOP
