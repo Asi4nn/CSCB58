@@ -14,13 +14,13 @@
 #
 # Which milestones have been reached in this submission?
 # (See the assignment handout for descriptions of the milestones)
-# - Milestone 2
+# - Milestone 3
 #
 # Which approved features have been implemented for milestone 3?
 # (See the assignment handout for the list of additional features)
 # 1. Difficulty increasing
-# 2. Scoring system
-# 3. Pick-ups (health, bonus points)
+# 2. Enemy ships
+# 3. Pick-ups (health, kill all enemies)
 # ... (add more if necessary)
 #
 # Link to video demonstration for final submission:
@@ -92,7 +92,6 @@ setup:	jal clear_screen	# clear the screen for resets
 
 	sw $zero, collisions	# reset collisions
 	li $s0, 0		# reset game tick
-	li $s1, 0		# reset score
 	
 	# (x, y) initial values for player model
 	li $t3, 26	# x
@@ -111,7 +110,7 @@ setup:	jal clear_screen	# clear the screen for resets
 #	t9 : RGB background colour
 #
 #	s0 : game tick
-#	s1 : score
+#	s1 : 
 #	s2 : inputAddress
 #	s3 : input boolean
 #	s4 : input value
@@ -140,7 +139,6 @@ main:
 	syscall
 	
 	addi $s0, $s0, 1	# increment game tick ( used for score and timing )
-	addi $s1, $s1, 1	# increment score
 	beq $s3, 1, handle_keypress
 keypress_return:
 	j main	# loop
@@ -383,10 +381,10 @@ check_powerup:
 	bgt $a2, $t5, no_collision_powerup	# objectY > playerY + playerHeight
 	# there is collision
 	beq $a3, 1, increase_health
-	beq $a3, 2, add_score
+	beq $a3, 2, kill_enemies
 	j set_inactive_powerup
 no_collision_powerup:
-	bge $a2, 125, set_inactive
+	bge $a2, 125, set_inactive_powerup
 	jr $ra
 set_inactive_powerup:
 	li $a0, 0
@@ -417,8 +415,35 @@ spawn_powerup:
 	li $a0, 1
 	jr $ra
 
-add_score:
-	addi $s1, $s1, 50
+kill_enemies:
+	# erase all objects
+	lw $a0, 0($s5)
+	lw $a1, 4($s5)
+	lw $a2, 8($s5)
+	jal clear_object
+	
+	lw $a0, 12($s5)
+	lw $a1, 16($s5)
+	lw $a2, 20($s5)
+	jal clear_object
+	
+	lw $a0, 24($s5)
+	lw $a1, 28($s5)
+	lw $a2, 32($s5)
+	jal clear_object
+	
+	# reset all object values
+	sw $zero, 0($s5)
+	sw $zero, 4($s5)
+	sw $zero, 8($s5)
+	
+	sw $zero, 12($s5)
+	sw $zero, 16($s5)
+	sw $zero, 20($s5)
+	
+	sw $zero, 24($s5)
+	sw $zero, 28($s5)
+	sw $zero, 32($s5)
 	j set_inactive_powerup
 	
 clear_screen:
