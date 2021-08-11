@@ -18,9 +18,9 @@
 #
 # Which approved features have been implemented for milestone 3?
 # (See the assignment handout for the list of additional features)
-# 1. (fill in the feature, if any)
-# 2. (fill in the feature, if any)
-# 3. (fill in the feature, if any)
+# 1. Difficulty increasing
+# 2. Scoring system
+# 3. Pick-ups (health, bonus points)
 # ... (add more if necessary)
 #
 # Link to video demonstration for final submission:
@@ -39,8 +39,9 @@
 	displayAddress: .word 0x10008000
 	inputAddress: .word 0xffff0000
 	
+	objects: .word 0:9	# store (active, x, y) values for 3 objects, active = 1 when the object is on screen
 	
-	objects: .word 0:9	# store (active, x,y) values for 3 objects, active = 1 when the object is on screen
+	powerup: .word 0:4	# store (active, x, y, type) values for 1 powerup object; type 1 = life up, type 2 = bonus score
 	
 	# note: scaled by 4 for address calculation
 	displayWidth: .word 256
@@ -48,11 +49,13 @@
 	
 	red: .word 0xff0000
 	white: .word 0xffffff
-	black: .word 0
+	background: .word 0x16285b
 	gray: .word 0x999999
 	
-	health: .word 3
+	health: .word 4
 	collisions: .word 0	# keep track of collisions with objects
+	
+	objectSpeed: .word 1
 
 .eqv refreshRate 40
 .eqv playerWidth 15
@@ -64,6 +67,8 @@
 .eqv objectWidth 2
 .eqv objectHeight 3
 
+.eqv powerupScoreColour		0x0AAFF5
+.eqv powerupHealthColour 	0x1AE535
 
 .text
 	# setting up registers
@@ -71,18 +76,23 @@
 	lw $t0, displayAddress # $t0 stores the base address for display
 	li $t1, 0xff0000 # $t1 stores the red colour code
 	li $t2, 0xffffff # $t1 stores the white colour code
-	li $t9, 0	 # $t9 stores black
+	li $t9, 0x16285b # $t9 stores bg colour
 	li $t8, 0x999999 # $t1 stores gray
 
 	lw $s2, inputAddress
 	la $s5, objects
+	la $s6, powerup
 	
 setup:	jal clear_screen	# clear the screen for resets
 	jal reset_objects
 	li $t7, 3
 	sw $t7, health		# reset health
-	li $t7, 0
-	sw $t7, collisions	# reset collisions
+	li $t7, 1
+	sw $t7, objectSpeed 	# reset object speed
+
+	sw $zero, collisions	# reset collisions
+	li $s0, 0		# reset game tick
+	li $s1, 0		# reset score
 	
 	# (x, y) initial values for player model
 	li $t3, 26	# x
@@ -100,13 +110,13 @@ setup:	jal clear_screen	# clear the screen for resets
 #	t8 : RGB object colour
 #	t9 : RGB background colour
 #
-#	s0 :
-#	s1 : 
+#	s0 : game tick
+#	s1 : score
 #	s2 : inputAddress
 #	s3 : input boolean
 #	s4 : input value
 #	s5 : object array
-#	s6 :
+#	s6 : powerup array
 #	s7 :
 
 	# sleep before starting
@@ -129,10 +139,15 @@ main:
 	li $a0, refreshRate
 	syscall
 	
+	addi $s0, $s0, 1	# increment game tick ( used for score and timing )
+	addi $s1, $s1, 1	# increment score
 	beq $s3, 1, handle_keypress
 keypress_return:
 	j main	# loop
 
+handle_end_keypress:
+	beq $s4, 0x70, handle_p
+	j ENDLOOP
 
 handle_keypress:
 	beq $s4, 0x70, handle_p
@@ -183,6 +198,12 @@ move_right:
 	addi $t3, $t3, playerSpeed	# move player x right
 	j keypress_return
 
+increase_health:
+	lw $t5, health
+	addi $t5, $t5, 1
+	sw $t5, health
+	j set_inactive_powerup
+
 lower_health:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
@@ -212,6 +233,18 @@ update_objects:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	
+	# powerup
+	lw $a0, 0($s6)
+	lw $a1, 4($s6)
+	lw $a2, 8($s6)
+	lw $a3, 12($s6)
+	jal update_powerup
+	sw $a0, 0($s6)
+	sw $a1, 4($s6)
+	sw $a2, 8($s6)
+	sw $a3, 12($s6)
+	
+	# objects
 	lw $a0, 0($s5)
 	lw $a1, 4($s5)
 	lw $a2, 8($s5)
@@ -245,14 +278,14 @@ update_object:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	
-	beq $a0, 1, activated
+	beq $a0, 1, activated_object
 	jal spawn_object
 	j object_return
-activated:
+activated_object:
 	jal clear_object
-	add $a1, $a1, 0
-	add $a2, $a2, 1
 	jal check_object
+	lw $t5, objectSpeed
+	add $a2, $a2, $t5		# move object down
 	jal draw_object
 object_return:
 	lw $ra, 0($sp)
@@ -262,20 +295,20 @@ object_return:
 check_object:
 	# collision test against player cords (t3, t4)
 	addi $t5, $t3, playerWidth
-	bgt $a1, $t5, no_collision	# objectX > playerX + playerWidth
+	bgt $a1, $t5, no_collision_object	# objectX > playerX + playerWidth
 	addi $t5, $a1, objectWidth
-	blt $t5, $t3, no_collision	# objectX + objectWidth < playerX
+	blt $t5, $t3, no_collision_object	# objectX + objectWidth < playerX
 	addi $t5, $a2, objectHeight
-	blt $t5, $t4, no_collision	# objectY + objectHeight < playerY
+	blt $t5, $t4, no_collision_object	# objectY + objectHeight < playerY
 	addi $t5, $t4, playerHeight
-	bgt $a2, $t5, no_collision	# objectY > playerY + playerHeight
+	bgt $a2, $t5, no_collision_object	# objectY > playerY + playerHeight
 	# there is collision
 	lw $t6 collisions
 	addi $t6, $t6, 1	# increment number of collisions by 1
 	sw $t6, collisions
 	jal lower_health
 	j set_inactive
-no_collision:
+no_collision_object:
 	bge $a2, 125, set_inactive
 	jr $ra
 set_inactive:
@@ -297,7 +330,7 @@ spawn_object:
 	li $a0, 1
 	jr $ra
 
-# sets all object values to default
+# sets all object values to default (including powerup)
 reset_objects:
 	sw $zero, 0($s5)
 	sw $zero, 4($s5)
@@ -310,8 +343,83 @@ reset_objects:
 	sw $zero, 24($s5)
 	sw $zero, 28($s5)
 	sw $zero, 32($s5)
+	
+	sw $zero, 0($s6)
+	sw $zero, 4($s6)
+	sw $zero, 8($s6)
+	sw $zero, 12($s6)
 
 	jr $ra
+	
+# -------------------------------------------------------------------------------------
+	
+# update single powerup, takes params (a0, a1, a2, a3) = (active, x, y, type)
+update_powerup:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	beq $a0, 1, activated_powerup
+	jal spawn_powerup
+	j powerup_return
+activated_powerup:
+	jal clear_powerup
+	add $a2, $a2, 1		# move powerup down
+	jal check_powerup
+	jal draw_powerup
+powerup_return:
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	jr $ra
+
+check_powerup:
+	# collision test against player cords (t3, t4)
+	addi $t5, $t3, playerWidth
+	bgt $a1, $t5, no_collision_powerup	# objectX > playerX + playerWidth
+	addi $t5, $a1, 2
+	blt $t5, $t3, no_collision_powerup	# objectX + objectWidth < playerX
+	addi $t5, $a2, 2
+	blt $t5, $t4, no_collision_powerup	# objectY + objectHeight < playerY
+	addi $t5, $t4, playerHeight
+	bgt $a2, $t5, no_collision_powerup	# objectY > playerY + playerHeight
+	# there is collision
+	beq $a3, 1, increase_health
+	beq $a3, 2, add_score
+	j set_inactive_powerup
+no_collision_powerup:
+	bge $a2, 125, set_inactive
+	jr $ra
+set_inactive_powerup:
+	li $a0, 0
+	li $a1, 0
+	li $a2, 0
+	li $a3, 0
+	j powerup_return
+
+# spawn powerup function, takes params (a0, a1, a2, a3) = (active, x, y, type)
+spawn_powerup:
+	# generate random x value for the object
+	li $v0, 42         # Service 42, random int range
+	li $a0, 0          # Select random generator 0
+	li $a1, 63	   # Select upper bound of random number
+	syscall            # Generate random int (returns in $a0)
+	
+	la $t7, ($a0)	# save random x in t7
+	
+	li $v0, 42         
+	li $a0, 1          
+	li $a1, 3	   
+	syscall            # Generate random int (returns in $a0)
+	
+	la $a3, ($a0)	# save random object type in a3
+	la $a1, ($t7)	# save random x in a1
+	
+	li $a2, 0	# y value for object (not adjusted for address)
+	li $a0, 1
+	jr $ra
+
+add_score:
+	addi $s1, $s1, 50
+	j set_inactive_powerup
 	
 clear_screen:
 	addi $t5, $t0, 0	# load display addr
@@ -334,7 +442,7 @@ END:
 ENDLOOP:	
 	lw $s3, 0($s2)	# keypress bool
 	lw $s4, 4($s2)	# keypress value
-	beq $s3, 1, handle_keypress
+	beq $s3, 1, handle_end_keypress
 	
 	# sleep for 100ms
 	li $v0, 32
@@ -410,6 +518,74 @@ clear_object:
 	sw $t9, ($t5)
 	
 	jr $ra
+
+# draw powerup function, takes a1 = x val, a2 = y val, a3 = type
+draw_powerup:
+	# calculate addr for y val
+	lw $t6, displayWidth
+	la $t5, ($a2)		
+	mult $t5, $t6
+	mflo $t5
+	
+	# calculate addr for x val
+	li $t7, 4
+	mult $a1, $t7
+	mflo $t6
+	
+	add $t5, $t5, $t6
+	
+	# offset from displayAddress
+	add $t5, $t0, $t5
+	
+	beq $a3, 1, health_colour
+	beq $a3, 2, score_colour
+health_colour:
+	li $t7, powerupHealthColour
+	j draw_powerup_jump
+score_colour:
+	li $t7, powerupScoreColour
+	j draw_powerup_jump
+draw_powerup_jump:	
+	sw $t7, ($t5)
+	addi $t5, $t5, 4
+	sw $t7, ($t5)
+	
+	addi $t5, $t5, 252
+	sw $t7, ($t5)
+	addi $t5, $t5, 4
+	sw $t7, ($t5)
+	
+	jr $ra
+
+# clear object function, takes a1 = x val, a2 = y val
+clear_powerup:
+	# calculate addr for y val
+	lw $t6, displayWidth
+	la $t5, ($a2)		
+	mult $t5, $t6
+	mflo $t5
+	
+	# calculate addr for x val
+	li $t7, 4
+	mult $a1, $t7
+	mflo $t6
+	
+	add $t5, $t5, $t6
+	
+	# offset from displayAddress
+	add $t5, $t0, $t5
+	
+	sw $t9, ($t5)
+	addi $t5, $t5, 4
+	sw $t9, ($t5)
+	
+	addi $t5, $t5, 252
+	sw $t9, ($t5)
+	addi $t5, $t5, 4
+	sw $t9, ($t5)
+	
+	jr $ra
+
 
 	
 # draw player function
