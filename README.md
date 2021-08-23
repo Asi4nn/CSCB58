@@ -16,3 +16,9 @@
 ## Exams
 
 ###### Midterm: 64.5 / 89
+###### Final: TBD
+
+## Final Project
+
+###### [Demo](https://youtu.be/b22lWdgB-xc)
+###### 14.5 / 15
